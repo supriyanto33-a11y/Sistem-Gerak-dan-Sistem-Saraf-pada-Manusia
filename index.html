@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Tubuh Manusia: Sistem Gerak & Saraf</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Fredoka -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                    },
+                    colors: {
+                        cerahYellow: '#FFD166',
+                        cerahPink: '#EF476F',
+                        cerahGreen: '#06D6A0',
+                        cerahBlue: '#118AB2',
+                        cerahDarkBlue: '#073B4C',
+                        cerahPurple: '#8338EC',
+                    },
+                    animation: {
+                        bounceSlow: 'bounce 2s infinite',
+                        pulseGlow: 'pulseGlow 2s infinite',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { transform: 'scale(1)', filter: 'drop-shadow(0 0 10px rgba(239, 71, 111, 0.6))' },
+                            '50%': { transform: 'scale(1.05)', filter: 'drop-shadow(0 0 20px rgba(6, 214, 160, 0.8))' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%);
+            min-height: 100vh;
+        }
+        .card-pop {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-pop:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+        .tab-btn.active {
+            background-color: #8338EC;
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(131, 56, 236, 0.39);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FF6B6B;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #EE5253;
+        }
+    </style>
+</head>
+<body class="text-slate-800 pb-12">
+
+    <header class="bg-gradient-to-r from-cerahPink via-cerahPurple to-cerahBlue text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-yellow-300 rounded-full flex items-center justify-center text-2xl text-pink-600 shadow-md animate-bounceSlow">
+                    <i class="fa-solid font-bold fa-brain"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide drop-shadow-md">PETUALANGAN TUBUH KITA 🚀</h1>
+                    <p class="text-xs md:text-sm text-yellow-200 font-medium">IPAS Kelas 6 SD • Sistem Gerak & Saraf Manusia</p>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <nav class="flex bg-white/20 p-1.5 rounded-full backdrop-blur-md shadow-inner gap-1 border border-white/30">
+                <button onclick="switchTab('materi')" id="btn-materi" class="tab-btn active px-4 py-2 rounded-full font-bold text-sm md:text-base transition duration-300 flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Materi Visual
+                </button>
+                <button onclick="switchTab('langkah')" id="btn-langkah" class="tab-btn px-4 py-2 rounded-full font-bold text-sm md:text-base text-slate-700 hover:text-white transition duration-300 flex items-center gap-2">
+                    <i class="fa-solid fa-route"></i> Cara Kerja
+                </button>
+                <button onclick="switchTab('kuis')" id="btn-kuis" class="tab-btn px-4 py-2 rounded-full font-bold text-sm md:text-base text-slate-700 hover:text-white transition duration-300 flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad"></i> Kuis (20 Soal)
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 mt-8">
+
+        <section id="tab-materi" class="space-y-8">
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 rounded-3xl p-6 shadow-xl border-4 border-white flex flex-col md:flex-row items-center gap-6">
+                <div class="text-5xl md:text-6xl text-pink-600">
+                    <i class="fa-solid fa-child-reaching"></i>
+                </div>
+                <div class="space-y-2">
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800">Halo Ilmuwan Cilik! 👋</h2>
+                    <p class="text-slate-700 font-medium text-lg">
+                        Tahukah kamu kenapa tubuh kita bisa berlari, melompat, dan merasakan sentuhan? Itu semua karena kerja sama hebat antara <span class="bg-pink-500 text-white px-2 py-0.5 rounded-lg">Sistem Gerak</span> dan <span class="bg-purple-600 text-white px-2 py-0.5 rounded-lg">Sistem Saraf</span>! Yuk pelajari bagian-bagiannya di bawah ini!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Interactive Skeleton & Organ Display -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Card 1: Rangka & Tulang -->
+                <div class="bg-white rounded-3xl p-6 shadow-xl border-4 border-cerahBlue card-pop">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-10 h-10 bg-cerahBlue text-white rounded-2xl flex items-center justify-center text-xl font-bold">1</span>
+                        <h3 class="text-2xl font-extrabold text-cerahBlue">Rangka (Tulang) - Alat Gerak Pasif</h3>
+                    </div>
+                    <div class="bg-sky-50 rounded-2xl p-4 text-center mb-4 border border-sky-200">
+                        <!-- SVG Visual Human Skeleton Interactive -->
+                        <svg class="w-48 h-64 mx-auto" viewBox="0 0 200 300">
+                            <!-- Tengkorak -->
+                            <g class="cursor-pointer hover:opacity-80 transition" onclick="showDetail('Tengkorak', 'Melindungi otak kita yang berharga dari benturan!')">
+                                <circle cx="100" cy="40" r="25" fill="#FFD166" stroke="#073B4C" stroke-width="3"/>
+                                <circle cx="92" cy="35" r="4" fill="#073B4C"/>
+                                <circle cx="108" cy="35" r="4" fill="#073B4C"/>
+                                <path d="M 92 48 Q 100 55 108 48" stroke="#073B4C" stroke-width="3" fill="none"/>
+                            </g>
+                            <!-- Tulang Belakang -->
+                            <path d="M 100 65 L 100 160" stroke="#EF476F" stroke-width="8" stroke-linecap="round" class="cursor-pointer hover:opacity-80" onclick="showDetail('Tulang Belakang', 'Penyangga utama tubuh dan tempat lewatnya saraf tulang belakang.')"/>
+                            <!-- Tulang Rusuk -->
+                            <g class="cursor-pointer hover:opacity-80" onclick="showDetail('Tulang Rusuk', 'Melindungi jantung dan paru-paru dari bahaya!')">
+                                <ellipse cx="100" cy="95" rx="30" ry="20" fill="none" stroke="#06D6A0" stroke-width="4"/>
+                                <ellipse cx="100" cy="115" rx="25" ry="15" fill="none" stroke="#06D6A0" stroke-width="4"/>
+                            </g>
+                            <!-- Tangan -->
+                            <line x1="100" y1="75" x2="50" y2="130" stroke="#118AB2" stroke-width="6" stroke-linecap="round" class="cursor-pointer hover:opacity-80" onclick="showDetail('Tulang Tangan', 'Membantu kita memegang, menulis, dan melempar bola!')"/>
+                            <line x1="100" y1="75" x2="150" y2="130" stroke="#118AB2" stroke-width="6" stroke-linecap="round" class="cursor-pointer hover:opacity-80" onclick="showDetail('Tulang Tangan', 'Membantu kita memegang, menulis, dan melempar bola!')"/>
+                            <!-- Kaki -->
+                            <line x1="90" y1="160" x2="70" y2="260" stroke="#8338EC" stroke-width="7" stroke-linecap="round" class="cursor-pointer hover:opacity-80" onclick="showDetail('Tulang Kaki', 'Tulang terkuat yang menopang tubuh saat berjalan dan melompat.')"/>
+                            <line x1="110" y1="160" x2="130" y2="260" stroke="#8338EC" stroke-width="7" stroke-linecap="round" class="cursor-pointer hover:opacity-80" onclick="showDetail('Tulang Kaki', 'Tulang terkuat yang menopang tubuh saat berjalan dan melompat.')"/>
+                        </svg>
+                        <p class="text-xs text-slate-500 mt-2 font-bold animate-pulse">👇 Klik bagian tubuh di atas untuk melihat fungsinya!</p>
+                    </div>
+                    <ul class="space-y-2 text-sm text-slate-700 font-semibold">
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Tulang tidak bisa bergerak sendiri (alat gerak pasif).</li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Tempat melekatnya otot dan memberi bentuk tubuh.</li>
+                    </ul>
+                </div>
+
+                <!-- Card 2: Otot -->
+                <div class="bg-white rounded-3xl p-6 shadow-xl border-4 border-cerahPink card-pop">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-10 h-10 bg-cerahPink text-white rounded-2xl flex items-center justify-center text-xl font-bold">2</span>
+                        <h3 class="text-2xl font-extrabold text-cerahPink">Otot - Alat Gerak Aktif</h3>
+                    </div>
+                    <div class="bg-pink-50 rounded-2xl p-4 text-center mb-4 border border-pink-200">
+                        <div class="flex justify-center items-center my-6 gap-4">
+                            <div class="text-center">
+                                <div class="w-20 h-20 bg-pink-400 text-white rounded-full flex items-center justify-center text-3xl shadow-lg mx-auto">
+                                    💪
+                                </div>
+                                <p class="text-sm font-bold text-pink-700 mt-2">Otot Lurik / Lurik</p>
+                                <span class="text-xs text-slate-500">Sesuai kehendak (Sadar)</span>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-20 h-20 bg-red-500 text-white rounded-full flex items-center justify-center text-3xl shadow-lg mx-auto">
+                                    🫀
+                                </div>
+                                <p class="text-sm font-bold text-red-700 mt-2">Otot Jantung</p>
+                                <span class="text-xs text-slate-500">Bekerja Otomatis</span>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-20 h-20 bg-purple-400 text-white rounded-full flex items-center justify-center text-3xl shadow-lg mx-auto">
+                                    🫁
+                                </div>
+                                <p class="text-sm font-bold text-purple-700 mt-2">Otot Polos</p>
+                                <span class="text-xs text-slate-500">Ada di Organ Dalam</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-3 font-medium">
+                        Otot bekerja dengan cara <b class="text-pink-600">kontraksi</b> (memendek & mengeras) dan <b class="text-blue-600">relaksasi</b> (memanjang & mengendur) untuk menarik tulang.
+                    </p>
+                    <ul class="space-y-2 text-sm text-slate-700 font-semibold">
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Otot disebut alat gerak aktif karena punya energi untuk bergerak.</li>
+                    </ul>
+                </div>
+
+                <!-- Card 3: Sendi -->
+                <div class="bg-white rounded-3xl p-6 shadow-xl border-4 border-cerahYellow card-pop">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-10 h-10 bg-yellow-500 text-white rounded-2xl flex items-center justify-center text-xl font-bold">3</span>
+                        <h3 class="text-2xl font-extrabold text-yellow-600">Sendi (Engsel Tubuh)</h3>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-4 font-medium">Sendi adalah tempat pertemuan antara dua tulang agar bisa digerakkan!</p>
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-200">
+                            <span class="font-bold text-yellow-700 block text-sm">🚪 Sendi Engsel</span>
+                            Bergerak 1 arah (Siku & Lutut)
+                        </div>
+                        <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-200">
+                            <span class="font-bold text-yellow-700 block text-sm">⚽ Sendi Peluru</span>
+                            Bergerak ke segala arah (Bahu & Pinggul)
+                        </div>
+                        <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-200">
+                            <span class="font-bold text-yellow-700 block text-sm">🔄 Sendi Putar</span>
+                            Gerakan memutar (Leher & Kepala)
+                        </div>
+                        <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-200">
+                            <span class="font-bold text-yellow-700 block text-sm">🏇 Sendi Pelana</span>
+                            Bergerak 2 arah (Pangkal Ibu Jari)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Sistem Saraf -->
+                <div class="bg-white rounded-3xl p-6 shadow-xl border-4 border-cerahPurple card-pop">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-10 h-10 bg-cerahPurple text-white rounded-2xl flex items-center justify-center text-xl font-bold">4</span>
+                        <h3 class="text-2xl font-extrabold text-cerahPurple">Sistem Saraf (Komputer Tubuh)</h3>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-2xl mb-4 border border-purple-200 flex items-center justify-around">
+                        <div class="text-center">
+                            <i class="fa-solid fa-brain text-5xl text-purple-600 mb-2"></i>
+                            <p class="font-extrabold text-purple-800 text-sm">Otak</p>
+                            <span class="text-xs text-slate-500">Pusat Komando</span>
+                        </div>
+                        <i class="fa-solid fa-bolt text-2xl text-yellow-500 animate-pulse"></i>
+                        <div class="text-center">
+                            <i class="fa-solid fa-network-wired text-5xl text-blue-500 mb-2"></i>
+                            <p class="font-extrabold text-blue-800 text-sm">Saraf Neuron</p>
+                            <span class="text-xs text-slate-500">Kabel Pembawa Pesan</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-600 font-medium">
+                        Saraf mengirimkan sinyal kabel listrik super cepat dari indra ke otak, dan dari otak ke otot untuk melakukan gerakan!
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Dynamic Detail Modal Box -->
+            <div id="materi-detail-box" class="hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-3xl shadow-2xl border-4 border-yellow-300 animate-fade-in">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 id="detail-title" class="text-2xl font-extrabold text-yellow-300"></h4>
+                        <p id="detail-desc" class="text-base mt-2 text-white/90 font-medium"></p>
+                    </div>
+                    <button onclick="closeDetail()" class="text-white hover:text-yellow-300 text-2xl font-bold">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-langkah" class="hidden space-y-8">
+            <div class="bg-white rounded-3xl p-6 shadow-xl border-4 border-cerahGreen">
+                <h2 class="text-3xl font-extrabold text-cerahGreen mb-2 flex items-center gap-3">
+                    <i class="fa-solid fa-route"></i> Bagaimana Gerakan Terjadi?
+                </h2>
+                <p class="text-slate-600 font-medium">Pilih jenis gerakan di bawah ini untuk melihat alur sinyal saraf dan gerak dalam tubuh kita!</p>
+
+                <!-- Interactive Switcher -->
+                <div class="flex gap-4 my-6">
+                    <button onclick="showWorkflow('sadar')" id="btn-wf-sadar" class="flex-1 py-3 px-4 rounded-2xl font-extrabold text-white bg-cerahGreen shadow-md transition text-center">
+                        🏃‍♂️ Gerak Sadar (Contoh: Menendang Bola)
+                    </button>
+                    <button onclick="showWorkflow('refleks')" id="btn-wf-refleks" class="flex-1 py-3 px-4 rounded-2xl font-extrabold text-slate-700 bg-slate-200 hover:bg-pink-400 hover:text-white transition text-center">
+                        ⚡ Gerak Refleks (Contoh: Kena Wajan Panas)
+                    </button>
+                </div>
+
+                <!-- Workflow Step Graphics -->
+                <div id="workflow-sadar" class="space-y-4">
+                    <div class="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-300 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-emerald-500 text-white rounded-2xl font-extrabold flex items-center justify-center text-xl shrink-0">1</div>
+                        <div>
+                            <h4 class="font-extrabold text-emerald-800 text-lg">Rangsangan Diterima Indra</h4>
+                            <p class="text-sm text-slate-600">Mata melihat bola sepak meluncur ke arahmu.</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-center text-emerald-500 text-2xl"><i class="fa-solid fa-arrow-down"></i></div>
+                    
+                    <div class="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-300 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-emerald-500 text-white rounded-2xl font-extrabold flex items-center justify-center text-xl shrink-0">2</div>
+                        <div>
+                            <h4 class="font-extrabold text-emerald-800 text-lg">Saraf Sensorik Kirim Sinyal</h4>
+                            <p class="text-sm text-slate-600">Saraf mengirimkan laporan ke otak: "Ada bola datang!"</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-center text-emerald-500 text-2xl"><i class="fa-solid fa-arrow-down"></i></div>
+
+                    <div class="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-300 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-purple-600 text-white rounded-2xl font-extrabold flex items-center justify-center text-xl shrink-0">3</div>
+                        <div>
+                            <h4 class="font-extrabold text-purple-900 text-lg">Otak Memproses & Mengambil Keputusan</h4>
+                            <p class="text-sm text-slate-600">Otak berpikir: "Tendang bola itu sekarang!"</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-center text-emerald-500 text-2xl"><i class="fa-solid fa-arrow-down"></i></div>
+
+                    <div class="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-300 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-emerald-500 text-white rounded-2xl font-extrabold flex items-center justify-center text-xl shrink-0">4</div>
+                        <div>
+                            <h4 class="font-extrabold text-emerald-800 text-lg">Saraf Motorik Kirim Perintah</h4>
+                            <p class="text-sm text-slate-600">Sinyal perintah dikirimkan dari otak menuju otot-otot kaki.</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-center text-emerald-500 text-2xl"><i class="fa-solid fa-arrow-down"></i></div>
+
+                    <div class="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-300 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-yellow-500 text-white rounded-2xl font-extrabold flex items-center justify-center text-xl shrink-0">5</div>
+                        <div>
+                            <h4 class="font-extrabold text-yellow-900 text-lg">Otot Berkontraksi & Kaki Bergerak!</h4>
+                            <p class="text-sm text-slate-600">Otot menarik tulang kaki, dan GOOOLL!! Bola berhasil ditendang!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="workflow-refleks" class="hidden space-y-4">
+                    <div class="bg-pink-50 p-4 rounded-2xl border-2 border-pink-300 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-pink-500 text-white rounded-2xl font-extrabold flex items-center justify-center text-xl shrink-0">1</div>
+                        <div>
+                            <h4 class="font-extrabold text-pink-800 text-lg">Rangsangan Bahaya (Panas/Sakit)</h4>
+                            <p class="text-sm text-slate-600">Jari tangan tidak sengaja menyentuh wajan panas.</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-center text-pink-500 text-2xl"><i class="fa-solid fa-arrow-down"></i></div>
+
+                    <div class="bg-pink-50 p-4 rounded-2xl border-2 border-pink-300 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-pink-500 text-white rounded-2xl font-extrabold flex items-center justify-center text-xl shrink-0">2</div>
+                        <div>
+                            <h4 class="font-extrabold text-pink-800 text-lg">Saraf Sensorik Kirim Sinyal Darurat</h4>
+                            <p class="text-sm text-slate-600">Sinyal meluncur cepat ke Tulang Belakang (Bukan Otak!).</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-center text-pink-500 text-2xl"><i class="fa-solid fa-arrow-down"></i></div>
+
+                    <div class="bg-pink-50 p-4 rounded-2xl border-2 border-pink-300 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-red-600 text-white rounded-2xl font-extrabold flex items-center justify-center text-xl shrink-0">3</div>
+                        <div>
+                            <h4 class="font-extrabold text-red-900 text-lg">Sumsum Tulang Belakang (Tanpa Berpikir)</h4>
+                            <p class="text-sm text-slate-600">Langsung memantulkan sinyal perintah darurat secara instan!</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-center text-pink-500 text-2xl"><i class="fa-solid fa-arrow-down"></i></div>
+
+                    <div class="bg-pink-50 p-4 rounded-2xl border-2 border-pink-300 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-yellow-500 text-white rounded-2xl font-extrabold flex items-center justify-center text-xl shrink-0">4</div>
+                        <div>
+                            <h4 class="font-extrabold text-yellow-900 text-lg">Tangan Langsung Ditarik Spontan!</h4>
+                            <p class="text-sm text-slate-600">Tangan menjauh dengan sangat cepat dalam hitungan detik untuk mencegah luka bakar.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="tab-kuis" class="hidden space-y-8">
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-4 border-cerahPurple">
+                
+                <!-- Start Screen -->
+                <div id="quiz-start" class="text-center py-8 space-y-6">
+                    <div class="w-24 h-24 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-5xl mx-auto shadow-inner animate-pulse">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-slate-800">Uji Kemampuanmu! 🏆</h2>
+                        <p class="text-slate-600 font-medium mt-2 max-w-lg mx-auto">
+                            Siap menjadi Master Sistem Gerak dan Saraf? Selesaikan <b>20 Soal Pilihan Ganda</b> seru di bawah ini!
+                        </p>
+                    </div>
+                    <button onclick="startQuiz()" class="bg-gradient-to-r from-cerahPink to-cerahPurple hover:opacity-90 text-white font-extrabold text-xl px-10 py-4 rounded-2xl shadow-lg transform transition hover:scale-105 active:scale-95">
+                        <i class="fa-solid fa-play"></i> Mulai Kuis Sekarang!
+                    </button>
+                </div>
+
+                <!-- Quiz Playground -->
+                <div id="quiz-body" class="hidden">
+                    <!-- Progress Bar -->
+                    <div class="mb-6">
+                        <div class="flex justify-between text-sm font-bold text-slate-600 mb-2">
+                            <span id="question-number">Soal 1 / 20</span>
+                            <span id="quiz-score-badge" class="text-purple-600">Skor: 0</span>
+                        </div>
+                        <div class="w-full bg-slate-200 h-4 rounded-full overflow-hidden">
+                            <div id="quiz-progress" class="bg-gradient-to-r from-cerahGreen to-cerahBlue h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+
+                    <!-- Question Box -->
+                    <div class="bg-slate-50 p-6 rounded-2xl border-2 border-slate-200 mb-6">
+                        <h3 id="question-text" class="text-lg md:text-xl font-bold text-slate-800">
+                            Pertanyaan akan muncul di sini...
+                        </h3>
+                    </div>
+
+                    <!-- Options Grid -->
+                    <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <!-- Dynamic Buttons -->
+                    </div>
+
+                    <!-- Explanation Alert Box -->
+                    <div id="explanation-box" class="hidden p-4 rounded-2xl mb-6 font-medium text-sm">
+                        <p id="explanation-text"></p>
+                    </div>
+
+                    <!-- Next Button -->
+                    <div class="flex justify-end">
+                        <button id="next-btn" onclick="nextQuestion()" class="hidden bg-cerahBlue text-white font-extrabold px-6 py-3 rounded-xl shadow-md hover:bg-blue-700 transition">
+                            Soal Selanjutnya <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Result Screen -->
+                <div id="quiz-result" class="hidden text-center py-8 space-y-6">
+                    <div id="result-icon" class="text-7xl">🎉</div>
+                    <h2 class="text-3xl font-extrabold text-slate-800">Kuis Selesai!</h2>
+                    <div class="bg-purple-50 p-6 rounded-3xl border-2 border-purple-200 max-w-sm mx-auto">
+                        <p class="text-slate-600 font-bold">Skor Akhir Kamu:</p>
+                        <p id="final-score" class="text-6xl font-black text-purple-600 my-2">0</p>
+                        <p id="result-message" class="text-sm font-semibold text-purple-800 mt-2"></p>
+                    </div>
+                    <button onclick="startQuiz()" class="bg-cerahPurple text-white font-extrabold text-lg px-8 py-3 rounded-2xl shadow-lg hover:bg-purple-800 transition">
+                        <i class="fa-solid fa-rotate-right"></i> Coba Lagi
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Tab Switcher Logic
+        function switchTab(tabName) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`btn-${tabName}`).classList.add('active');
+        }
+
+        // Show SVG Detail Logic
+        function showDetail(title, desc) {
+            const box = document.getElementById('materi-detail-box');
+            document.getElementById('detail-title').innerText = title;
+            document.getElementById('detail-desc').innerText = desc;
+            box.classList.remove('hidden');
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function closeDetail() {
+            document.getElementById('materi-detail-box').classList.add('hidden');
+        }
+
+        // Workflow Switcher Logic
+        function showWorkflow(type) {
+            const wfSadar = document.getElementById('workflow-sadar');
+            const wfRefleks = document.getElementById('workflow-refleks');
+            const btnSadar = document.getElementById('btn-wf-sadar');
+            const btnRefleks = document.getElementById('btn-wf-refleks');
+
+            if (type === 'sadar') {
+                wfSadar.classList.remove('hidden');
+                wfRefleks.classList.add('hidden');
+                btnSadar.className = "flex-1 py-3 px-4 rounded-2xl font-extrabold text-white bg-cerahGreen shadow-md transition text-center";
+                btnRefleks.className = "flex-1 py-3 px-4 rounded-2xl font-extrabold text-slate-700 bg-slate-200 hover:bg-pink-400 hover:text-white transition text-center";
+            } else {
+                wfSadar.classList.add('hidden');
+                wfRefleks.classList.remove('hidden');
+                btnRefleks.className = "flex-1 py-3 px-4 rounded-2xl font-extrabold text-white bg-cerahPink shadow-md transition text-center";
+                btnSadar.className = "flex-1 py-3 px-4 rounded-2xl font-extrabold text-slate-700 bg-slate-200 hover:bg-emerald-400 hover:text-white transition text-center";
+            }
+        }
+
+        // 20 Kuis Data
+        const quizQuestions = [
+            {
+                q: "1. Organ penyusun sistem gerak manusia yang berperan sebagai alat gerak pasif adalah...",
+                options: ["Otot", "Tulang / Rangka", "Saraf", "Jantung"],
+                answer: 1,
+                explain: "Tulang disebut alat gerak pasif karena tidak dapat bergerak sendiri tanpa bantuan otot."
+            },
+            {
+                q: "2. Bagian tubuh yang berfungsi sebagai alat gerak aktif karena dapat berkontraksi adalah...",
+                options: ["Sendi", "Kulit", "Otot", "Tulang"],
+                answer: 2,
+                explain: "Otot adalah alat gerak aktif yang memiliki energi untuk memendek (kontraksi) dan memanjang."
+            },
+            {
+                q: "3. Organ pusat komando seluruh aktivitas tubuh dan sistem saraf manusia adalah...",
+                options: ["Hati", "Paru-paru", "Otak", "Lambung"],
+                answer: 2,
+                explain: "Otak berfungsi sebagai pusat kendali utama yang memproses informasi dan memberi perintah."
+            },
+            {
+                q: "4. Tulang yang berfungsi untuk melindungi organ vital otak dari benturan adalah tulang...",
+                options: ["Dada", "Tengkorak", "Rusuk", "Panggul"],
+                answer: 1,
+                explain: "Tulang tengkorak yang keras membungkus dan melindungi otak kita."
+            },
+            {
+                q: "5. Sendi yang memungkinkan gerakan ke segala arah, seperti pada bahu dan pinggul adalah sendi...",
+                options: ["Engsel", "Putar", "Peluru", "Pelana"],
+                answer: 2,
+                explain: "Sendi peluru berbentuk seperti bola dan mangkuk sehingga dapat bergerak ke segala arah."
+            },
+            {
+                q: "6. Sendi yang terdapat pada siku tangan dan lutut kaki adalah contoh dari sendi...",
+                options: ["Peluru", "Engsel", "Mati", "Geser"],
+                answer: 1,
+                explain: "Sendi engsel hanya bergerak ke satu arah, seperti engsel pintu rumah."
+            },
+            {
+                q: "7. Jenis otot yang bekerja secara tidak sadar dan terus menerus memompa darah adalah otot...",
+                options: ["Lurik", "Polos", "Jantung", "Paha"],
+                answer: 2,
+                explain: "Otot jantung bekerja secara otomatis tanpa henti untuk memompa darah ke seluruh tubuh."
+            },
+            {
+                q: "8. Sel pembawa pesan atau sinyal listrik dalam sistem saraf disebut...",
+                options: ["Neuron / Sel Saraf", "HB", "Eritrosit", "Hormon"],
+                answer: 0,
+                explain: "Neuron adalah unit dasar sistem saraf yang menyalurkan sinyal-sinyal listrik."
+            },
+            {
+                q: "9. Gerakan cepat yang terjadi secara otomatis tanpa dipikirkan terlebih dahulu disebut...",
+                options: ["Gerak Sadar", "Gerak Lambat", "Gerak Refleks", "Gerak Indah"],
+                answer: 2,
+                explain: "Gerak refleks terjadi otomatis sebagai perlindungan tubuh dari bahaya secara cepat."
+            },
+            {
+                q: "10. Pusat pengendali utama untuk gerak REFLEKS pada manusia adalah...",
+                options: ["Otak Besar", "Sumsum Tulang Belakang", "Mata", "Tulang Kaki"],
+                answer: 1,
+                explain: "Sinyal gerak refleks diproses langsung di sumsum tulang belakang agar respon lebih cepat."
+            },
+            {
+                q: "11. Otot yang menempel pada tulang kita dan bekerja sesuai dengan kehendak kita adalah otot...",
+                options: ["Polos", "Lurik / Rangka", "Jantung", "Halus"],
+                answer: 1,
+                explain: "Otot lurik menempel pada rangka dan kita gerakkan secara sadar saat berlari/menulis."
+            },
+            {
+                q: "12. Contoh dari gerak refleks dalam kehidupan sehari-hari adalah...",
+                options: ["Menulis di buku tulis", "Menendang bola ke gawang", "Menarik tangan saat terkena benda panas", "Membaca buku pelajaran"],
+                answer: 2,
+                explain: "Menarik tangan dari benda panas terjadi cepat tanpa dipikirkan, dinamakan gerak refleks."
+            },
+            {
+                q: "13. Saraf yang bertugas membawa sinyal/informasi DARI indra MENUJU ke otak disebut saraf...",
+                options: ["Motorik", "Sensorik", "Pusat", "Otot"],
+                answer: 1,
+                explain: "Saraf sensorik mendeteksi rangsangan indra (rasa, sakit, lihat) lalu membawanya ke otak."
+            },
+            {
+                q: "14. Saraf yang bertugas membawa perintah DARI otak MENUJU ke otot untuk bergerak disebut saraf...",
+                options: ["Sensorik", "Motorik", "Tengkorak", "Darah"],
+                answer: 1,
+                explain: "Saraf motorik bertugas menggerakkan otot berdasarkan perintah dari otak."
+            },
+            {
+                q: "15. Sendi yang terdapat di antara tulang leher dan tulang tengkorak adalah sendi...",
+                options: ["Engsel", "Pelana", "Putar", "Kaku"],
+                answer: 2,
+                explain: "Sendi putar memungkinkan kepala kita memutar dan menggeleng."
+            },
+            {
+                q: "16. Tulang rusuk dan tulang dada berfungsi untuk melindungi organ vital yaitu...",
+                options: ["Otak dan Mata", "Jantung dan Paru-paru", "Lambung dan Usus", "Mata dan Telinga"],
+                answer: 1,
+                explain: "Sangkar tulang rusuk melindungi organ dada penting seperti jantung dan paru-paru."
+            },
+            {
+                q: "17. Makanan yang kaya akan mineral kalsium dan vitamin D sangat baik untuk menjaga kesehatan...",
+                options: ["Tulang dan Gigi", "Rambut", "Kuku", "Mata"],
+                answer: 0,
+                explain: "Kalsium dan Vitamin D sangat dibutuhkan untuk menjaga tulang tetap padat dan kuat."
+            },
+            {
+                q: "18. Saat otot bekerja atau memendek dan mengeras, peristiwa ini disebut...",
+                options: ["Relaksasi", "Kontraksi", "Distraksi", "Iritasi"],
+                answer: 1,
+                explain: "Kontraksi adalah kondisi saat otot memendek untuk menarik tulang."
+            },
+            {
+                q: "19. Kelainan tulang melengkung ke belakang sehingga tampak bongkok disebut...",
+                options: ["Lordosis", "Kifosis", "Skoliosis", "Patah tulang"],
+                answer: 1,
+                explain: "Kifosis adalah kelainan tulang belakang yang melengkung berlebihan ke belakang."
+            },
+            {
+                q: "20. Agar sistem gerak dan saraf kita tetap sehat, sikap tubuh yang benar saat duduk belajar adalah...",
+                options: ["Bungkuk ke depan", "Sangat tiduran", "Tegak dan sejajar", "Miring ke kanan"],
+                answer: 2,
+                explain: "Duduk tegak menjaga posisi tulang belakang tetap lurus dan saraf tidak terjepit."
+            }
+        ];
+
+        let currentQuestionIdx = 0;
+        let score = 0;
+
+        function startQuiz() {
+            currentQuestionIdx = 0;
+            score = 0;
+            document.getElementById('quiz-start').classList.add('hidden');
+            document.getElementById('quiz-result').classList.add('hidden');
+            document.getElementById('quiz-body').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const qData = quizQuestions[currentQuestionIdx];
+            document.getElementById('question-number').innerText = `Soal ${currentQuestionIdx + 1} / ${quizQuestions.length}`;
+            document.getElementById('quiz-score-badge').innerText = `Skor: ${score}`;
+            
+            // Progress Bar Width
+            const progressPct = ((currentQuestionIdx) / quizQuestions.length) * 100;
+            document.getElementById('quiz-progress').style.width = `${progressPct}%`;
+
+            document.getElementById('question-text').innerText = qData.q;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            document.getElementById('explanation-box').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-4 rounded-xl text-left font-bold text-slate-700 bg-white border-2 border-slate-200 hover:border-cerahPurple hover:bg-purple-50 transition card-pop flex justify-between items-center";
+                btn.innerHTML = `<span>${String.fromCharCode(65 + idx)}. ${opt}</span> <i class="fa-regular fa-circle text-slate-300"></i>`;
+                btn.onclick = () => checkAnswer(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIdx, btnElement) {
+            const qData = quizQuestions[currentQuestionIdx];
+            const allBtns = document.getElementById('options-container').children;
+
+            // Disable all buttons
+            for (let btn of allBtns) {
+                btn.disabled = true;
+                btn.classList.remove('card-pop');
+            }
+
+            const expBox = document.getElementById('explanation-box');
+            const expText = document.getElementById('explanation-text');
+
+            if (selectedIdx === qData.answer) {
+                score += 5; // Total 100 for 20 questions
+                btnElement.className = "w-full p-4 rounded-xl text-left font-bold text-white bg-green-500 border-2 border-green-600 flex justify-between items-center shadow-md";
+                btnElement.querySelector('i').className = "fa-solid fa-circle-check text-white";
+
+                expBox.className = "p-4 rounded-2xl mb-6 font-medium text-sm bg-green-100 border border-green-300 text-green-900";
+                expText.innerHTML = `<b>🎉 Benar Sekali!</b> ${qData.explain}`;
+            } else {
+                btnElement.className = "w-full p-4 rounded-xl text-left font-bold text-white bg-red-500 border-2 border-red-600 flex justify-between items-center shadow-md";
+                btnElement.querySelector('i').className = "fa-solid fa-circle-xmark text-white";
+
+                // Highlight correct answer
+                allBtns[qData.answer].className = "w-full p-4 rounded-xl text-left font-bold text-white bg-green-500 border-2 border-green-600 flex justify-between items-center shadow-md";
+
+                expBox.className = "p-4 rounded-2xl mb-6 font-medium text-sm bg-red-100 border border-red-300 text-red-900";
+                expText.innerHTML = `<b>❌ Kurang Tepat!</b> ${qData.explain}`;
+            }
+
+            expBox.classList.remove('hidden');
+            document.getElementById('next-btn').classList.remove('hidden');
+            document.getElementById('quiz-score-badge').innerText = `Skor: ${score}`;
+        }
+
+        function nextQuestion() {
+            currentQuestionIdx++;
+            if (currentQuestionIdx < quizQuestions.length) {
+                showQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            document.getElementById('quiz-body').classList.add('hidden');
+            document.getElementById('quiz-result').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+
+            const resMsg = document.getElementById('result-message');
+            const resIcon = document.getElementById('result-icon');
+
+            if (score >= 80) {
+                resIcon.innerText = "🏆";
+                resMsg.innerText = "Luar biasa! Kamu adalah Master Biologi Tubuh Manusia! 🌟";
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } else if (score >= 60) {
+                resIcon.innerText = "👍";
+                resMsg.innerText = "Hebat! Kamu sudah memahami materi dengan cukup baik!";
+            } else {
+                resIcon.innerText = "📚";
+                resMsg.innerText = "Jangan berkecil hati! Yuk pelajari materi visual lagi lalu coba kuis ini!";
+            }
+        }
+    </script>
+</body>
+</html>
